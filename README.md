@@ -120,10 +120,6 @@ relative = abundance.div(abundance.sum(axis=1), axis=0)
 abun_clr = clr(multi_replace(relative.to_numpy()))
 ```
 
-Standardize taxon names, combine mapping collisions, and complete the intended
-feature table before CLR. Do not treat a CLR value of zero as zero biological
-abundance; it is the neutral log-ratio coordinate.
-
 ### MRI matrix
 
 If MRI values have already been calculated, SPECTRA can also start from an MRI table:
