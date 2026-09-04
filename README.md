@@ -17,6 +17,8 @@ Yin W., Liu L., Zhu R. et al. **Gut Microbiome-derived Disease-associated Indice
 - Example metagenomic abundance, MRI, BMI-MRI, 16S abundance, and metadata files
 - Extension application: 16S abundance workflow
 - Extension application: high-BMI SPECTRA workflow
+- 16S and WGS taxon name-conversion Skills
+- A reproducible normal-BMI WGS case study
 - Command-line scripts and shared utility functions
 
 ## Directory
@@ -40,6 +42,11 @@ Yin W., Liu L., Zhu R. et al. **Gut Microbiome-derived Disease-associated Indice
 │   └── extensions/
 │       ├── 16S/
 │       └── high_bmi/
+├── skills/
+│   ├── spectra-16s-name-converter/
+│   └── spectra-wgs-name-converter/
+├── case_studies/
+│   └── NingL_2022_CRC/
 ├── scripts/
 │   ├── utils.py
 │   ├── predict_spectra_from_abundance.py
@@ -53,7 +60,7 @@ Yin W., Liu L., Zhu R. et al. **Gut Microbiome-derived Disease-associated Indice
 
 ## Environment
 
-Recommended Python version: `3.12`.
+Recommended Python version: `3.10`.
 
 ```bash
 conda env create -f environment.yml
@@ -78,6 +85,12 @@ Main package versions:
 - `scikit-bio==0.6.2`
 - `shap==0.47.0`
 
+## Before Running the Workflow
+
+1. For WGS data, MetaPhlAn3 species profiles are recommended. Results from other profiler versions should be harmonized before use.
+2. Use MetaPhlAn-style species names, preferably the MetaPhlAn3 convention,for both WGS and 16S inputs. If the source labels use another convention,se the AI-assisted conversion Skills in [`skills/`](skills/) and review the mapping table before prediction.
+3. Before prediction, we recommend checking the coverage of the input microbial features and phenotype-specific MSigs. Higher coverage provides the model with more relevant microbial information and can support more accurate predictions.
+
 ## Input Data
 
 All input CSV files use sample IDs in the first column.
@@ -90,7 +103,26 @@ Use this input for the main SPECTRA workflow:
 data/example_metagenomic_abundance.csv
 ```
 
-Rows are samples and columns are microbial taxa/features. Values should follow the clr transformed abundance format as the example file.
+Rows are samples and columns are microbial taxa/features. Values should follow
+the CLR-transformed abundance format shown in the example file.
+
+### Recommended CLR preparation
+
+Starting from a non-negative count or relative-abundance table, first close
+each sample to a relative composition, use multiplicative replacement for
+zeros, and then apply CLR. This is the recommended procedure and is also used
+by the xMICARE workflow:
+
+```python
+from skbio.stats.composition import clr, multi_replace
+
+relative = abundance.div(abundance.sum(axis=1), axis=0)
+abun_clr = clr(multi_replace(relative.to_numpy()))
+```
+
+Standardize taxon names, combine mapping collisions, and complete the intended
+feature table before CLR. Do not treat a CLR value of zero as zero biological
+abundance; it is the neutral log-ratio coordinate.
 
 ### MRI matrix
 
@@ -122,7 +154,7 @@ The high-BMI extension uses:
 data/example_bmi_mri.csv
 ```
 
-The example metadata file contains sample IDs and phenotype labels:
+The example metadata file contains only sample IDs and phenotype labels:
 
 ```text
 data/example_metadata.csv
@@ -210,6 +242,13 @@ python scripts/predict_bmi.py \
   --input path/to/your_bmi_mri.csv \
   --output results/your_bmi_predictions.csv
 ```
+
+## Worked WGS Case Study
+
+[`case_studies/NingL_2022_CRC/`](case_studies/NingL_2022_CRC/) provides a
+complete example starting from a published MetaPhlAn3 matrix. It includes
+normal-BMI cohort selection, name conversion, feature preparation, CLR, MRI
+calculation, final SPECTRA probabilities, and evaluation in one notebook.
 
 ## Quick Check
 
