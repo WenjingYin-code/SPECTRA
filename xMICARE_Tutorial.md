@@ -219,13 +219,13 @@ probability ranking.
 
 ## Input format
 
-For the main Screening workflow, use a CSV file with samples as rows and microbial
-taxa/features as columns. The first column should identify sample IDs, and abundance
-values should be numeric. MetaPhlAn-style taxonomic names are recommended for the
-main workflow.
-
-For the 16S extension, use the provided 16S example file as a template for the
-expected abundance-table structure.
+For the main Screening workflow, provide a relative-abundance CSV with samples
+as rows, microbial features as columns, and sample IDs in the first column.
+Values may be proportions (row totals approximately 1) or percentages
+(approximately 100). MGS/WGS feature names must follow MetaPhlAn3; 16S names must
+match the MPA annotation labels used by the supplied 16S reference. The models
+include the required preprocessing. Use the name-conversion Skills in `skills/`
+and review the mapping if your source names follow another convention.
 
 For the high-BMI extension, use a non-negative relative abundance table with samples
 as rows and microbial taxa as columns.
@@ -262,7 +262,7 @@ samples are arranged in rows and microbial features are arranged in columns.
 Recommended workflow:
 
 1. Open **More → 16S Data**.
-2. Choose the example dataset or upload a 16S abundance CSV file.
+2. Choose the example dataset or upload a 16S relative-abundance CSV file.
 3. Run the 16S model.
 4. Review the computed MRI values and SPECTRA probability matrix.
 5. Select a sample and generate the report.
