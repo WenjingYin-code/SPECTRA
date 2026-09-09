@@ -85,40 +85,23 @@ Main package versions:
 - `scikit-bio==0.6.2`
 - `shap==0.47.0`
 
-## Before Running the Workflow
-
-1. For WGS data, MetaPhlAn3 species profiles are recommended. Results from other profiler versions should be harmonized before use.
-2. Use MetaPhlAn-style species names, preferably the MetaPhlAn3 convention,for both WGS and 16S inputs. If the source labels use another convention,se the AI-assisted conversion Skills in [`skills/`](skills/) and review the mapping table before prediction.
-3. Before prediction, we recommend checking the coverage of the input microbial features and phenotype-specific MSigs. Higher coverage provides the model with more relevant microbial information and can support more accurate predictions.
-
 ## Input Data
 
-All input CSV files use sample IDs in the first column.
+Provide relative abundance as a CSV matrix with samples in rows, microbial
+features in columns, and sample IDs in the first column. Values may be
+proportions (row totals approximately 1) or percentages (approximately 100).
+The models include the required preprocessing.
+MSig name-format or incomplete-coverage checks issue advisory warnings and allow
+prediction to continue.
 
-### Metagenomic abundance matrix
+MGS/WGS feature names must follow the **MetaPhlAn3** version. For **16S**, names
+must match the **MPA annotation** labels used by the supplied 16S reference.
+If source names differ, use the name-conversion Skills in [`skills/`](skills/)
+and review the mapping before prediction.
 
-Use this input for the main SPECTRA workflow:
+### Metagenomic relative abundance matrix
 
-```text
-data/example_metagenomic_abundance.csv
-```
-
-Rows are samples and columns are microbial taxa/features. Values should follow
-the CLR-transformed abundance format shown in the example file.
-
-### Recommended CLR preparation
-
-Starting from a non-negative count or relative-abundance table, first close
-each sample to a relative composition, use multiplicative replacement for
-zeros, and then apply CLR. This is the recommended procedure and is also used
-by the xMICARE workflow:
-
-```python
-from skbio.stats.composition import clr, multi_replace
-
-relative = abundance.div(abundance.sum(axis=1), axis=0)
-abun_clr = clr(multi_replace(relative.to_numpy()))
-```
+Use `data/example_metagenomic_abundance.csv` for the main SPECTRA workflow.
 
 ### MRI matrix
 
@@ -138,7 +121,7 @@ ACVD, AS, BPA, CL, IBD, IGT, T2D, CI, HC, FL, ME, SC
 
 ### Extension inputs
 
-The 16S extension uses:
+The 16S extension takes relative abundance and uses:
 
 ```text
 data/example_16s_abundance.csv
@@ -243,8 +226,8 @@ python scripts/predict_bmi.py \
 
 [`case_studies/NingL_2022_CRC/`](case_studies/NingL_2022_CRC/) provides a
 complete example starting from a published MetaPhlAn3 matrix. It includes
-normal-BMI cohort selection, name conversion, feature preparation, CLR, MRI
-calculation, final SPECTRA probabilities, and evaluation in one notebook.
+normal-BMI cohort selection, name conversion, relative-abundance input,
+built-in preprocessing, MRI calculation, SPECTRA probabilities, and evaluation.
 
 ## Quick Check
 
