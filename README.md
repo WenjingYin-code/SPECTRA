@@ -99,6 +99,9 @@ must match the **MPA annotation** labels used by the supplied 16S reference.
 If source names differ, use the name-conversion Skills in [`skills/`](skills/)
 and review the mapping before prediction.
 
+For guidance starting from sequencing reads, see the
+[WGS and 16S processing workflows](xMICARE_Tutorial.md#preparing-relative-abundance-from-raw-reads).
+
 ### Metagenomic relative abundance matrix
 
 Use `data/example_metagenomic_abundance.csv` for the main SPECTRA workflow.
