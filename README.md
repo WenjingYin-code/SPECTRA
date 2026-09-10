@@ -100,7 +100,7 @@ If source names differ, use the name-conversion Skills in [`skills/`](skills/)
 and review the mapping before prediction.
 
 For guidance starting from sequencing reads, see the
-[WGS and 16S processing workflows](xMICARE_Tutorial.md#preparing-relative-abundance-from-raw-reads).
+[WGS and 16S processing workflows](#preparing-relative-abundance-from-raw-reads).
 
 ### Metagenomic relative abundance matrix
 
@@ -141,6 +141,55 @@ The example metadata file contains only sample IDs and phenotype labels:
 ```text
 data/example_metadata.csv
 ```
+
+## Preparing relative abundance from raw reads
+
+Complete sequencing-read processing before uploading a relative-abundance table.
+The models apply their own preprocessing internally.
+
+### WGS: curatedMetagenomicData v3 taxonomic profiling
+
+Please process WGS metagenomic sequencing data as follows. For initial read quality
+control, we recommend assessing read quality using FastQC and removing sequencing
+adapters, low-quality bases, and host-derived reads using
+[KneadData](https://github.com/biobakery/kneaddata), which combines Trimmomatic and
+Bowtie2. Then follow the taxonomic-profiling workflow used by curatedMetagenomicData
+v3: run MetaPhlAn v3.0 with the `mpa_v30_CHOCOPhlAn_201901` database and default
+profiling parameters. For paired-end data, supply both read files to MetaPhlAn.
+Extract species-level relative abundances for each sample/run, retain the full
+MetaPhlAn3 taxonomic lineage names and all profiled species, combine the profiles
+into a sample-by-species matrix, and normalize each sample to sum to 1. See the
+[curatedMetagenomicData pipeline documentation](https://waldronlab.io/curatedMetagenomicData/articles/our-pipeline.html)
+and [MetaPhlAn3 documentation](https://github.com/biobakery/MetaPhlAn/wiki/MetaPhlAn-3.0)
+for details.
+
+The initial quality-control steps above are recommendations for new raw reads.
+curatedMetagenomicData v3 relied on study-specific preprocessing, as explained in
+the [maintainer's processing and database notes](https://support.bioconductor.org/p/9154295/).
+
+### 16S: GMrepo processing
+
+Please process the 16S sequencing data according to the
+[GMrepo pipeline](https://doi.org/10.1093/nar/gkz764) (Nucleic Acids Research, 2020),
+as follows: assess read quality using FastQC v0.11.8, remove sequencing vector
+sequences and low-quality bases using Trimmomatic (alternatively, use Cutadapt for
+primer removal, e.g., for Illumina data), and discard reads shorter than two-thirds
+of their original length. Merge paired-end reads using Casper and process
+single-end reads directly. Convert FASTQ to FASTA using Seqtk if needed. Assign
+taxonomy using MAPseq v1.2, retaining reads with a genus-level combined score >0.4.
+Calculate species-level relative abundances for each sample/run and normalize the
+abundances to sum to 1.
+
+### If you used another processing workflow
+
+Check species-name compatibility before prediction, especially if you used a
+different profiling tool or taxonomy database. WGS names should follow MetaPhlAn3;
+16S names should match the MPA annotation labels used by the supplied 16S reference.
+If names differ, you can use `spectra-wgs-name-converter` for WGS or
+`spectra-16s-name-converter` for 16S, then review the mapped and unmatched names.
+Keep all source species in the relative-abundance table. Name conversion
+standardizes labels; abundance estimates can still differ between processing
+workflows.
 
 ## Main Workflow: Metagenomic Abundance -> SPECTRA Prediction
 
